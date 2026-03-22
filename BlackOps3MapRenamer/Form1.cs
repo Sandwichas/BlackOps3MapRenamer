@@ -8,17 +8,20 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace BlackOps3MapRenamer
 {
     public partial class Form1 : Form
     {
 
+        private ToolTip _dupeToolTip = new ToolTip();
         private string _mapName;
         private string _mapDir;
         private string _mapSourceDir;
         private string _mapLedDir;
         private string _zoneFilePath;
         private string _zoneSourceDirectoryPath;
+        private string _lastBackupFolderPath;
         private string[] _assetsLanguages = { "traditionalchinese", "spanish", "simplifiedchinese", "russian",
             "portuguese", "polish", "japanese", "italian", "german", "french", "englisharabic", "english" };
         private const string AllLanguage = "all";
@@ -37,6 +40,8 @@ namespace BlackOps3MapRenamer
         public Form1()
         {
             InitializeComponent();
+            _dupeToolTip.ToolTipTitle = "Info";
+            _dupeToolTip.SetToolTip(dupeCheckBox, "If checked, duplicates the map, renames the duplicate and keeps the original.");
         }
 
         public static string GetSpecificSteamLibraryPath()
@@ -180,6 +185,7 @@ namespace BlackOps3MapRenamer
                 MessageBox.Show("Don't add 'zm_' prefix. It will be included automatically. Please remove it.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            renameButton.Enabled = false;
             detailsRichTextBox.Invoke(new Action(() => detailsRichTextBox.Clear()));
             progressBar1.Style = ProgressBarStyle.Marquee;
             progressBar1.MarqueeAnimationSpeed = 10;
@@ -206,6 +212,7 @@ namespace BlackOps3MapRenamer
             await RenameMapLedFile();
             await Task.Run(() => RenameFilesInDirectoryRecursively(Path.GetDirectoryName(_mapDir), _mapName, MapNamePrefix + newNameTextBox.Text));
             // Rename the map folder itself
+            string previousMapDir = _mapDir;
             string parentDir = Path.GetDirectoryName(_mapDir.TrimEnd(Path.DirectorySeparatorChar));
             if (!string.IsNullOrEmpty(parentDir))
             {
@@ -230,9 +237,36 @@ namespace BlackOps3MapRenamer
                     AppendColoredTextSafe("[FOLDER RENAME ERROR] " + ex.Message + "\n", Color.Red);
                 }
             }
+            if (dupeCheckBox.Checked)
+            {
+                // Copy the backup folder back to the original location to keep the original map
+                string backupFolderPath = _lastBackupFolderPath;
+                if (!string.IsNullOrEmpty(backupFolderPath))
+                {
+                    string dupeFolderPath = previousMapDir;
+                    try
+                    {
+                        if (!Directory.Exists(dupeFolderPath))
+                        {
+                            await Task.Run(() => CopyDirectoryRecursively(backupFolderPath, dupeFolderPath));
+                            AppendColoredTextSafe("[DUPLICATE CREATED] " + dupeFolderPath + "\n", Color.Green);
+                        }
+                        else
+                        {
+                            AppendColoredTextSafe("[DUPLICATE SKIP] Target exists: " + dupeFolderPath + "\n", Color.Orange);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        AppendColoredTextSafe("[DUPLICATE ERROR] " + ex.Message + "\n", Color.Red);
+                    }
+
+                }
+            }
             progressBar1.Style = ProgressBarStyle.Blocks;
             progressBar1.MarqueeAnimationSpeed = 0;
             MessageBox.Show("Renaming process completed.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            renameButton.Enabled = true;
         }
 
         private async Task<List<string>> RenameScriptOccurences()
@@ -279,6 +313,8 @@ namespace BlackOps3MapRenamer
             string newMapName = MapNamePrefix + newNameTextBox.Text;
             string oldFilePath = Path.Combine(_mapSourceDir, _mapName + ".map");
             string newFilePath = Path.Combine(_mapSourceDir, newMapName + ".map");
+            // Check if path exists before copying
+            if (File.Exists(oldFilePath))
             await Task.Run(() => File.Copy(oldFilePath, newFilePath, true));
             return null;
         }
@@ -288,6 +324,7 @@ namespace BlackOps3MapRenamer
             string newMapName = MapNamePrefix + newNameTextBox.Text;
             string oldFilePath = Path.Combine(_mapLedDir, _mapName + ".led");
             string newFilePath = Path.Combine(_mapLedDir, newMapName + ".led");
+            if (File.Exists(oldFilePath))
             await Task.Run(() => File.Copy(oldFilePath, newFilePath, true));
             return null;
         }
@@ -877,6 +914,7 @@ namespace BlackOps3MapRenamer
                 if (copyEntireMap)
                 {
                     string destMapFolder = Path.Combine(backupRoot, _mapName);
+                    _lastBackupFolderPath = destMapFolder; // Store for potential restore
                     await DirectoryCopy(_mapDir, destMapFolder, true);
                     AppendColoredTextSafe("[BACKUP] Entire map copied to: " + destMapFolder + Environment.NewLine, Color.Blue);
                 }
@@ -1119,6 +1157,44 @@ namespace BlackOps3MapRenamer
         {
             Properties.Settings.Default.usermap_folder = null;
             Properties.Settings.Default.Save();
+        }
+
+        private void dupeCheckBox_MouseHover(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void dupeCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!dupeCheckBox.Checked)
+            {
+                dupeCheckBox.Text = "⬜ Duplicate";
+            } else
+            {
+                dupeCheckBox.Text = "✅ Duplicate";
+            }
+        }
+
+        // Add this method to the Form1 class to fix CS0103 for 'CopyDirectoryRecursively'
+        private void CopyDirectoryRecursively(string sourceDir, string destDir)
+        {
+            DirectoryInfo dir = new DirectoryInfo(sourceDir);
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException("Source directory does not exist: " + sourceDir);
+
+            Directory.CreateDirectory(destDir);
+
+            foreach (FileInfo file in dir.GetFiles())
+            {
+                string targetFilePath = Path.Combine(destDir, file.Name);
+                file.CopyTo(targetFilePath, true);
+            }
+
+            foreach (DirectoryInfo subDir in dir.GetDirectories())
+            {
+                string newDestDir = Path.Combine(destDir, subDir.Name);
+                CopyDirectoryRecursively(subDir.FullName, newDestDir);
+            }
         }
     }
 }

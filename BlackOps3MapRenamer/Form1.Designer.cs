@@ -35,6 +35,7 @@
             this.newNameLabel = new System.Windows.Forms.Label();
             this.newNamePrefixLabel = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.dupeCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // browseButton
@@ -145,12 +146,34 @@
             this.progressBar1.Size = new System.Drawing.Size(1187, 22);
             this.progressBar1.TabIndex = 9;
             // 
+            // dupeCheckBox
+            // 
+            this.dupeCheckBox.Appearance = System.Windows.Forms.Appearance.Button;
+            this.dupeCheckBox.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.dupeCheckBox.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
+            this.dupeCheckBox.FlatAppearance.BorderSize = 2;
+            this.dupeCheckBox.FlatAppearance.CheckedBackColor = System.Drawing.Color.DimGray;
+            this.dupeCheckBox.FlatAppearance.MouseDownBackColor = System.Drawing.Color.Gray;
+            this.dupeCheckBox.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Gray;
+            this.dupeCheckBox.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.dupeCheckBox.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.dupeCheckBox.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
+            this.dupeCheckBox.Location = new System.Drawing.Point(8, 92);
+            this.dupeCheckBox.Name = "dupeCheckBox";
+            this.dupeCheckBox.Size = new System.Drawing.Size(145, 45);
+            this.dupeCheckBox.TabIndex = 10;
+            this.dupeCheckBox.Text = "⬜ Duplicate";
+            this.dupeCheckBox.UseVisualStyleBackColor = false;
+            this.dupeCheckBox.CheckedChanged += new System.EventHandler(this.dupeCheckBox_CheckedChanged);
+            this.dupeCheckBox.MouseHover += new System.EventHandler(this.dupeCheckBox_MouseHover);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ClientSize = new System.Drawing.Size(1211, 473);
+            this.Controls.Add(this.dupeCheckBox);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.newNamePrefixLabel);
             this.Controls.Add(this.newNameLabel);
@@ -169,7 +192,7 @@
             this.MaximumSize = new System.Drawing.Size(1229, 520);
             this.MinimumSize = new System.Drawing.Size(1229, 520);
             this.Name = "Form1";
-            this.Text = "Black Ops 3 Map Renamer 1.1";
+            this.Text = "Black Ops 3 Map Renamer 1.2";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -189,6 +212,7 @@
 		private System.Windows.Forms.Label newNameLabel;
 		private System.Windows.Forms.Label newNamePrefixLabel;
 		private System.Windows.Forms.ProgressBar progressBar1;
-	}
+        private System.Windows.Forms.CheckBox dupeCheckBox;
+    }
 }
 
