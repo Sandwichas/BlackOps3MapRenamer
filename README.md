@@ -5,6 +5,7 @@ If you believe that there are still some files that need to be processed that I 
 
 ## Features
 - Makes a backup (found in the same folder of the executable)
+- Duplicates the map
 - Renames inside files
 - Renames led (built light) files
 - Renames map source files
@@ -20,6 +21,7 @@ If you believe that there are still some files that need to be processed that I 
 - Close mod tools.
 - Click the browse button and locate to your map folder found in usermaps folder (e.g. ...common\Call of Duty Black Ops III\usermaps\zm_giant).
 - Write a new name for the map (without zm_).
+- (Optional) Tick Duplicate checkbox if you want to keep the original map and instead rename a duplicated map.
 - Click the Rename button and wait for it to finish processing.
 - Open mod tools and build for all languages (compile & link) and you're done!
 
